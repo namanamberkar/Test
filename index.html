@@ -9,22 +9,32 @@
   <link rel="manifest" href="manifest.json" />
 
   <style>
+    /* --- Mobile viewport height fix --- */
+    :root {
+      --vh: 100vh;
+    }
+
+    /* Global styles and a nice background */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
+    html, body {
+        height: 100%;
+        width: 100%;
+    }
+
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #FFDA81 0%, #FFE5A3 100%);
-      min-height: 100vh;
+      min-height: calc(var(--vh, 1vh) * 100); /* Use our custom variable */
       display: flex;
       justify-content: center;
       align-items: center;
       padding: 20px;
       position: relative;
-      overflow-x: hidden;
     }
 
     body::before {
@@ -34,919 +44,342 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="90" r="2.5" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="60" r="1.5" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
-      pointer-events: none;
-      animation: float 20s ease-in-out infinite;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="25" cy="25" r="15" fill="%23FFFFFF" opacity="0.1"/><circle cx="75" cy="75" r="15" fill="%23FFFFFF" opacity="0.1"/><circle cx="75" cy="25" r="10" fill="%23FFFFFF" opacity="0.1"/><circle cx="25" cy="75" r="10" fill="%23FFFFFF" opacity="0.1"/></svg>') center center repeat;
+      z-index: -1;
+      opacity: 0.5;
     }
 
-    @keyframes float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-10px) rotate(180deg); }
-    }
-
+    /* Main container styling */
     .container {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
+      background-color: #FFFFFF;
       border-radius: 20px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.2);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      padding: 40px;
       width: 100%;
-      max-width: 480px;
-      padding: 40px 35px;
+      max-width: 450px;
       text-align: center;
-      position: relative;
-      transform: translateY(0);
-      transition: all 0.3s ease;
-      animation: slideUp 0.6s ease-out;
+      transition: all 0.3s ease-in-out;
     }
-
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
+    
     .container:hover {
       transform: translateY(-5px);
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.3);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
     }
 
-    .logo {
-      width: 140px;
-      margin: 0 auto 25px;
-      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
-      transition: transform 0.3s ease;
+    .header-logo img {
+      max-width: 150px;
+      margin-bottom: 20px;
     }
 
-    .logo:hover {
-      transform: scale(1.05) rotate(2deg);
-    }
-
-    h2 {
-      font-size: 2rem;
-      color: #2c3e50;
+    h1 {
+      font-size: 1.8rem;
+      color: #333;
       margin-bottom: 30px;
       font-weight: 600;
-      background: linear-gradient(135deg, #2c3e50, #34495e);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
     }
 
+    /* Date input and button styling */
     .input-group {
       display: flex;
-      flex-direction: column;
-      gap: 15px;
+      justify-content: center;
+      align-items: center;
       margin-bottom: 30px;
     }
 
-    @media(min-width: 600px) {
-      .input-group {
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        gap: 20px;
-      }
-    }
-
-    .date-picker-container {
-      position: relative;
-      width: 100%;
-    }
-
-    .date-input {
-      width: 100%;
-      padding: 16px 20px;
-      border-radius: 12px;
-      border: 2px solid #e1e8ed;
+    #dateInput {
       font-size: 1rem;
-      background: #f8fafc;
-      color: #2c3e50;
-      transition: all 0.3s ease;
+      padding: 10px 15px;
+      border: 2px solid #ddd;
+      border-right: none;
+      border-radius: 10px 0 0 10px;
+      outline: none;
+      width: 200px;
+      transition: all 0.2s ease-in-out;
+      text-align: center;
+    }
+
+    #dateInput:focus {
+      border-color: #FFDA81;
+    }
+
+    .calendar-icon {
+      background-color: #fff;
+      border: 2px solid #ddd;
+      border-left: none;
+      border-radius: 0 10px 10px 0;
+      padding: 10px;
       cursor: pointer;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+    }
+    
+    .calendar-icon::before {
+      content: "📅";
+      font-size: 1.2rem;
     }
 
-    .date-input:hover, .date-input.active {
-      border-color: #664229;
-      background: #fff;
-      box-shadow: 0 0 0 3px rgba(102, 66, 41, 0.1);
+    .button {
+      background-color: #5C524F;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 25px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease-in-out;
+      width: 100%;
+      max-width: 250px;
+    }
+
+    .button:hover:not([disabled]) {
+      background-color: #726A66;
       transform: translateY(-2px);
     }
 
-    .date-input .calendar-icon {
-      font-size: 1.2rem;
-      color: #664229;
-    }
-
-    .custom-calendar {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-      border: 2px solid #e1e8ed;
-      z-index: 1000;
-      opacity: 0;
-      transform: translateY(-10px);
-      pointer-events: none;
-      transition: all 0.3s ease;
-      margin-top: 8px;
-    }
-
-    .custom-calendar.show {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: all;
-    }
-
-    .calendar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px;
-      border-bottom: 1px solid #e1e8ed;
-      background: linear-gradient(135deg, #664229 0%, #8B5A3C 100%);
-      color: white;
-      border-radius: 13px 13px 0 0;
-    }
-
-    .calendar-nav {
-      background: rgba(255, 255, 255, 0.2);
-      border: none;
-      color: white;
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      transition: all 0.3s ease;
-    }
-
-    .calendar-nav:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: scale(1.1);
-    }
-
-    .calendar-month-year {
-      font-size: 1.1rem;
-      font-weight: 600;
-    }
-
-    .calendar-grid {
-      padding: 20px;
-    }
-
-    .calendar-weekdays {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
-      margin-bottom: 10px;
-    }
-
-    .calendar-weekday {
-      text-align: center;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #7f8c8d;
-      padding: 8px 0;
-    }
-
-    .calendar-days {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
-    }
-
-    .calendar-day {
-      aspect-ratio: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: all 0.3s ease;
-      position: relative;
-    }
-
-    .calendar-day:hover {
-      background: rgba(102, 66, 41, 0.1);
-      transform: scale(1.1);
-    }
-
-    .calendar-day.other-month {
-      color: #bdc3c7;
-    }
-
-    .calendar-day.today {
-      background: linear-gradient(135deg, #FFDA81 0%, #FFE5A3 100%);
-      color: #664229;
-      font-weight: 600;
-    }
-
-    .calendar-day.selected {
-      background: linear-gradient(135deg, #664229 0%, #8B5A3C 100%);
-      color: white;
-      font-weight: 600;
-    }
-
-    .calendar-day.disabled {
-      color: #ecf0f1;
+    .button:disabled {
       cursor: not-allowed;
-      pointer-events: none;
+      opacity: 0.6;
     }
 
-    .calendar-day.available {
-      background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-      color: white;
-      font-weight: 600;
-      position: relative;
+    /* Loading spinner and results area */
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left-color: #5C524F;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto 0;
+      display: none; /* Hidden by default */
     }
 
-    .calendar-day.unavailable {
-      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-      color: white;
-      font-weight: 600;
-      position: relative;
-    }
-
-    .calendar-day.checking {
-      background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-      color: white;
-      position: relative;
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-
-    .calendar-day.checking::after {
-      content: '⏳';
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      font-size: 0.7rem;
-      animation: spin 2s linear infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-
-    .availability-legend {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-top: 15px;
-      padding: 15px;
-      background: rgba(102, 66, 41, 0.05);
-      border-radius: 10px;
-      font-size: 0.8rem;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .legend-color {
-      width: 12px;
-      height: 12px;
-      border-radius: 3px;
-    }
-
-    .legend-available { background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); }
-    .legend-unavailable { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); }
-    .legend-today { background: linear-gradient(135deg, #FFDA81 0%, #FFE5A3 100%); }
-
-    input[type="date"] {
-      display: none;
-    }
-
-    button {
-      width: 100%;
-      padding: 18px;
-      border-radius: 12px;
-      border: none;
-      background: linear-gradient(135deg, #664229 0%, #8B5A3C 100%);
-      color: white;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 8px 20px rgba(102, 66, 41, 0.3);
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    button::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: left 0.5s;
-    }
-
-    button:hover::before {
-      left: 100%;
-    }
-
-    button:hover {
-      background: linear-gradient(135deg, #FFDA81 0%, #FFE5A3 100%);
-      color: #664229;
-      transform: translateY(-3px);
-      box-shadow: 0 12px 30px rgba(102, 66, 41, 0.4);
-    }
-
-    button:active {
-      transform: translateY(-1px);
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     #result {
-      margin-top: 30px;
-      font-size: 1rem;
-      color: #2c3e50;
-      padding: 25px;
-      background: linear-gradient(135deg, #f8fafc 0%, #fff 100%);
-      border-radius: 15px;
-      border: 2px solid #e1e8ed;
-      min-height: 120px;
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
       text-align: left;
       opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.4s ease;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+      transform: translateY(10px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      min-height: 50px; /* Prevent layout shift */
     }
 
     #result.show {
       opacity: 1;
       transform: translateY(0);
     }
-
-    .error {
-      color: #e74c3c;
-      font-weight: 600;
-      background: rgba(231, 76, 60, 0.1);
-      padding: 15px;
-      border-radius: 8px;
-      border-left: 4px solid #e74c3c;
-    }
-
-    .success-message {
-      color: #27ae60;
-      font-weight: 600;
-      background: rgba(39, 174, 96, 0.1);
-      padding: 15px;
-      border-radius: 8px;
-      border-left: 4px solid #27ae60;
+    
+    .result-header {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #5C524F;
       margin-bottom: 15px;
     }
 
-    .spinner {
-      border: 4px solid rgba(102, 66, 41, 0.1);
-      border-top: 4px solid #664229;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      animation: spin 1s linear infinite;
-      margin: 30px auto;
-      display: none;
-      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
     .no-results {
+      color: #777;
       text-align: center;
-      color: #7f8c8d;
-      font-style: italic;
-      padding: 20px;
-      background: rgba(127, 140, 141, 0.05);
-      border-radius: 8px;
-      border: 2px dashed #bdc3c7;
+      padding: 10px;
     }
 
-    /* --- NEW STYLES for interactive results --- */
-    #result .availability-list {
-      margin-top: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    .error {
+      color: #e53935;
+      font-weight: bold;
+      text-align: center;
+      padding: 10px;
     }
 
     #result details {
-      border: 1px solid #e1e8ed;
-      border-radius: 10px;
-      background: #fff;
-      transition: all 0.3s ease;
-    }
-
-    #result details[open] {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 10px;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      background-color: #fff;
     }
 
     #result summary {
-      padding: 15px 20px;
-      font-weight: 600;
-      color: #2c3e50;
+      font-weight: bold;
+      padding: 10px;
       cursor: pointer;
-      list-style: none; /* Remove default marker */
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: background-color 0.2s ease;
+      outline: none;
+      background-color: #f1f1f1;
+      border-radius: 8px;
+      transition: background-color 0.2s;
     }
     
     #result summary:hover {
-      background-color: #f8fafc;
+      background-color: #e0e0e0;
     }
 
-    #result summary::-webkit-details-marker {
-      display: none; /* Hide for Chrome/Safari */
+    #result summary span {
+      font-weight: normal;
+      color: #777;
+      margin-left: 10px;
     }
 
-    #result summary::after {
-      content: '▼'; /* Custom dropdown arrow */
-      font-size: 0.8rem;
-      color: #664229;
-      transition: transform 0.3s ease;
+    #result ul {
+      list-style-type: none;
+      padding: 10px 20px;
+      margin-left: 0;
     }
 
-    #result details[open] summary::after {
-      transform: rotate(180deg);
-    }
-
-    #result details ul {
-      padding: 0 20px 15px 40px;
-      margin-top: -5px;
-      list-style-type: '✓  ';
-      color: #27ae60;
-    }
-
-    #result details ul li {
+    #result li {
       padding: 8px 0;
-      color: #34495e;
-      border: none;
-      background: none;
-      border-bottom: 1px solid #ecf0f1;
+      border-bottom: 1px dashed #ddd;
     }
-    
-    #result details ul li:last-child {
+
+    #result li:last-child {
       border-bottom: none;
     }
-    /* --- END NEW STYLES --- */
 
-    /* Mobile optimizations */
-    @media (max-width: 480px) {
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
       .container {
-        padding: 30px 25px;
-        margin: 10px;
+        padding: 20px;
       }
-
-      h2 {
-        font-size: 1.6rem;
+      h1 {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
       }
-
-      button {
-        padding: 14px 16px;
+      .input-group {
+        flex-direction: column;
       }
-    }
-
-    /* Loading state for button */
-    button.loading {
-      pointer-events: none;
-      opacity: 0.7;
-    }
-
-    button.loading::after {
-      content: '';
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      margin: auto;
-      border: 2px solid transparent;
-      border-top-color: currentColor;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    /* Styles for the new install button */
-    #installButton {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 12px 24px;
-      border-radius: 50px;
-      border: none;
-      background: linear-gradient(135deg, #664229 0%, #8B5A3C 100%);
-      color: white;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      z-index: 1000;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      /* By default, this button is hidden. It will be shown if the app is installable. */
-      display: none;
-    }
-
-    #installButton:hover {
-      transform: translateX(-50%) translateY(-3px);
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-    }
-
-    /* Style for the 'checking' state of the calendar days */
-    .calendar-day.checking {
-      background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-      color: white;
-      position: relative;
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-    
-    /* Custom message box for debugging */
-    #debugMessage {
-        position: fixed;
-        bottom: 80px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: #27ae60;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        z-index: 1001;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.3s ease, visibility 0.3s ease;
-    }
-    #debugMessage.show {
-        opacity: 1;
-        visibility: visible;
+      #dateInput, .calendar-icon {
+        width: 100%;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        text-align: left;
+      }
+      .calendar-icon {
+        justify-content: center;
+        border-left: 2px solid #ddd;
+        border-right: 2px solid #ddd;
+      }
+      .button {
+        max-width: 100%;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container" role="application" aria-label="Property Availability">
-    <img src="icon.png" alt="Logo" class="logo" />
-    <h2>Check Property Availability</h2>
+  <div class="container">
+    <div class="header-logo">
+      <img src="icon.png" alt="Aikya Homestay Logo" />
+    </div>
+    <h1>Check Property Availability</h1>
 
     <div class="input-group">
-      <div class="date-picker-container">
-        <div class="date-input" onclick="toggleCalendar()" id="dateDisplay" role="button" aria-haspopup="true">
-          <span id="selectedDateText">Select a date</span>
-          <span class="calendar-icon">📅</span>
-        </div>
-
-        <input type="date" id="datePicker" aria-label="Date input" />
-
-        <div class="custom-calendar" id="customCalendar" aria-hidden="true">
-          <div class="calendar-header">
-            <button class="calendar-nav" onclick="previousMonth()" aria-label="Previous month">‹</button>
-            <div class="calendar-month-year" id="monthYear" aria-live="polite"></div>
-            <button class="calendar-nav" onclick="nextMonth()" aria-label="Next month">›</button>
-          </div>
-
-          <div class="calendar-grid">
-            <div class="calendar-weekdays">
-              <div class="calendar-weekday">Sun</div>
-              <div class="calendar-weekday">Mon</div>
-              <div class="calendar-weekday">Tue</div>
-              <div class="calendar-weekday">Wed</div>
-              <div class="calendar-weekday">Thu</div>
-              <div class="calendar-weekday">Fri</div>
-              <div class="calendar-weekday">Sat</div>
-            </div>
-
-            <div class="calendar-days" id="calendarDays" role="grid"></div>
-
-            <div class="availability-legend" aria-hidden="true">
-              <div class="legend-item">
-                <div class="legend-color legend-available"></div><span>Available</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-color legend-unavailable"></div><span>Unavailable</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-color legend-today"></div><span>Today</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <input type="text" id="dateInput" placeholder="Select a date" readonly />
+      <label for="dateInput" class="calendar-icon"></label>
     </div>
 
-    <button id="checkBtn" onclick="checkAvailability()">Check Availability</button>
-    <div class="spinner" id="spinner" aria-hidden="true"></div>
-    <div id="result" aria-live="polite"></div>
+    <button id="checkButton" class="button">Check Availability</button>
+    <div class="spinner" id="spinner"></div>
+
+    <div id="result">
+      <!-- Availability results will be displayed here -->
+    </div>
   </div>
-  
-  <button id="installButton">Install App</button>
-  <div id="debugMessage" aria-hidden="true">Install prompt was triggered!</div>
 
+  <!-- JavaScript for logic -->
   <script>
-    // Set your Apps Script URL here
-    const apiUrl = 'https://script.google.com/macros/s/AKfycbwc02uKflV6e6zXgcipE_pQLhidAl8nXWUgTpwvo2nh5aeiVUEoW9SNuH1mgBQgg4BV5w/exec';
+    // Configuration
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyTq_yH37G0Jt3_pUa3jO7J1t9N9w2zD9G7E5h/exec"; // Replace with your Google Apps Script URL
 
-    // Calendar state
-    let currentDate = new Date();
-    let selectedDate = null;
-    let calendarVisible = false;
-    let availabilityCache = new Map();
+    // DOM Elements
+    const dateInput = document.getElementById('dateInput');
+    const calendarIcon = document.querySelector('.calendar-icon');
+    const checkButton = document.getElementById('checkButton');
+    const spinner = document.getElementById('spinner');
 
-    // Toggle calendar visibility
-    function toggleCalendar() {
-      const calendar = document.getElementById('customCalendar');
-      const dateInput = document.getElementById('dateDisplay');
-
-      calendarVisible = !calendarVisible;
-      if (calendarVisible) {
-        calendar.classList.add('show');
-        dateInput.classList.add('active');
-        calendar.setAttribute('aria-hidden', 'false');
-        renderCalendar();
-      } else {
-        calendar.classList.remove('show');
-        dateInput.classList.remove('active');
-        calendar.setAttribute('aria-hidden', 'true');
-      }
-    }
-
-    function renderCalendar() {
-      const monthYear = document.getElementById('monthYear');
-      const calendarDays = document.getElementById('calendarDays');
-
-      const year = currentDate.getFullYear();
-      const month = currentDate.getMonth();
-
-      const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-      monthYear.textContent = `${monthNames[month]} ${year}`;
-
-      const firstDay = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      const daysInPrevMonth = new Date(year, month, 0).getDate();
-
-      const today = new Date();
-      today.setHours(0,0,0,0);
-      
-      calendarDays.innerHTML = '';
-
-      for (let i = firstDay - 1; i >= 0; i--) {
-        const day = daysInPrevMonth - i;
-        const el = createDayElement(day, 'other-month', year, month - 1);
-        calendarDays.appendChild(el);
-      }
-
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dayDate = new Date(year, month, day);
-        const isToday = dayDate.toDateString() === today.toDateString();
-        const isSelected = selectedDate && dayDate.toDateString() === selectedDate.toDateString();
-        const isPast = dayDate < today;
-
-        let classes = '';
-        if (isToday) classes += ' today';
-        if (isSelected) classes += ' selected';
-        if (isPast) classes += ' disabled';
-
-        const dayElement = createDayElement(day, classes, year, month, dayDate);
-        calendarDays.appendChild(dayElement);
-      }
-
-      const totalCells = calendarDays.children.length;
-      const remainingCells = 42 - totalCells;
-      for (let day = 1; day <= remainingCells && day <= 14; day++) {
-        const el = createDayElement(day, 'other-month', year, month + 1);
-        calendarDays.appendChild(el);
-      }
-      checkMonthAvailability(year, month);
-    }
-
-    function createDayElement(day, classes, year, month, dayDate = null) {
-      const dayElement = document.createElement('div');
-      dayElement.className = `calendar-day ${classes}`;
-      dayElement.textContent = day;
-
-      if (!classes.includes('disabled') && !classes.includes('other-month')) {
-        dayElement.onclick = () => selectDate(year, month, day);
-        dayElement.tabIndex = 0;
-      }
-
-      if (dayDate) {
-        const formattedDate = `${dayDate.getFullYear()}-${(dayDate.getMonth() + 1).toString().padStart(2, '0')}-${dayDate.getDate().toString().padStart(2, '0')}`;
-        dayElement.setAttribute('data-date', formattedDate);
-      }
-
-      return dayElement;
-    }
-
-    function selectDate(year, month, day) {
-      selectedDate = new Date(year, month, day);
-      
-      const dateInput = document.getElementById('datePicker');
-      const selectedDateText = document.getElementById('selectedDateText');
-
-      const formattedDate = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-      
-      dateInput.value = formattedDate;
-      localStorage.setItem('lastDate', formattedDate);
-
-      const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
-      selectedDateText.textContent = selectedDate.toLocaleDateString('en-US', options);
-
-      toggleCalendar();
-    }
-
-    function previousMonth() {
-      currentDate.setMonth(currentDate.getMonth() - 1);
-      renderCalendar();
-    }
-
-    function nextMonth() {
-      currentDate.setMonth(currentDate.getMonth() + 1);
-      renderCalendar();
-    }
-
-    document.addEventListener('click', function(event) {
-      const calendar = document.getElementById('customCalendar');
-      const dateInput = document.getElementById('dateDisplay');
-      if (!calendar.contains(event.target) && !dateInput.contains(event.target)) {
-        if (calendarVisible) toggleCalendar();
+    // Initialize Flatpickr for the date picker
+    flatpickr(dateInput, {
+      dateFormat: "Y-m-d",
+      minDate: "today",
+      onClose: function(selectedDates, dateStr, instance) {
+        checkButton.removeAttribute('disabled');
       }
     });
 
-    document.addEventListener('DOMContentLoaded', function() {
-      const last = localStorage.getItem('lastDate');
-      if (last) {
-        const [year, month, day] = last.split('-').map(Number);
-        selectedDate = new Date(year, month - 1, day);
-        document.getElementById('datePicker').value = last;
-        const opts = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
-        document.getElementById('selectedDateText').textContent = selectedDate.toLocaleDateString('en-US', opts);
-      }
-      renderCalendar();
-    });
+    // Event Listeners
+    checkButton.addEventListener('click', handleCheckAvailability);
 
-    // Function to update the style of a specific day element
-    function updateDayAvailability(dateKey, availability) {
-        const dayElement = document.querySelector(`.calendar-day[data-date="${dateKey}"]`);
-        if (dayElement) {
-            dayElement.classList.remove('checking', 'available', 'unavailable');
-            if (availability === 'checking') {
-                dayElement.classList.add('checking');
-            } else if (availability === 'available') {
-                dayElement.classList.add('available');
-            } else if (availability === 'unavailable') {
-                dayElement.classList.add('unavailable');
-            }
-        }
-    }
-
-    // Check availability for all days in the month
-    async function checkMonthAvailability(year, month) {
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dayDate = new Date(year, month, day);
-            if (dayDate < today) continue;
-
-            const dateKey = `${dayDate.getFullYear()}-${(dayDate.getMonth() + 1).toString().padStart(2, '0')}-${dayDate.getDate().toString().padStart(2, '0')}`;
-            
-            // Use cached availability if available
-            if (availabilityCache.has(dateKey)) {
-                updateDayAvailability(dateKey, availabilityCache.get(dateKey));
-                continue;
-            }
-
-            // Mark the day as checking and start fetching in the background
-            updateDayAvailability(dateKey, 'checking');
-            checkDateAvailability(dateKey);
-        }
-    }
-
-    // Function to fetch availability for a single date
-    async function checkDateAvailability(dateKey) {
-        try {
-            const resp = await fetch(`${apiUrl}?date=${dateKey}`);
-            if (!resp.ok) {
-                throw new Error('Network response was not ok.');
-            }
-            const data = await resp.json();
-
-            let availability = 'unavailable';
-            if (data.available_properties && data.available_properties.length > 0) {
-                availability = 'available';
-            }
-
-            // Store in cache and update the UI
-            availabilityCache.set(dateKey, availability);
-            updateDayAvailability(dateKey, availability);
-        } catch (err) {
-            console.error('Error checking availability for', dateKey, err);
-            // On error, revert to a neutral state (or show as unavailable)
-            updateDayAvailability(dateKey, null);
-        }
-    }
-
-    async function checkAvailability() {
-      const dateInput = document.getElementById('datePicker').value;
-      const resultDiv = document.getElementById('result');
-      const spinner = document.getElementById('spinner');
-      const button = document.getElementById('checkBtn');
-
-      if (!dateInput) {
-        showError("Please select a date to check availability.");
+    async function handleCheckAvailability() {
+      const selectedDate = dateInput.value;
+      if (!selectedDate) {
+        showError("Please select a date first.");
         return;
       }
 
-      const formattedDate = dateInput;
+      const button = checkButton;
+      const resultDiv = document.getElementById('result');
 
-      resultDiv.innerHTML = "";
+      // UI state for loading
       resultDiv.classList.remove('show');
       spinner.style.display = 'block';
-      button.classList.add('loading');
       button.setAttribute('disabled', 'true');
       button.textContent = 'Checking...';
 
+      const url = `${WEB_APP_URL}?date=${selectedDate}`;
+
       try {
-        const res = await fetch(`${apiUrl}?date=${formattedDate}`);
-        const data = await res.json();
+        const response = await fetch(url);
+        const data = await response.json();
 
         spinner.style.display = 'none';
-        button.classList.remove('loading');
         button.removeAttribute('disabled');
         button.textContent = 'Check Availability';
+        resultDiv.innerHTML = '';
 
         if (data.error) {
           showError(data.error);
           return;
         }
 
-        if (data.available_rooms && data.available_rooms.length > 0) {
-            const availableRooms = data.available_rooms;
-            const grouped = {
-                'Villa Properties': [],
-                'Kadri Properties': [],
-                'Falnir Properties': [],
-                'R-Block': [],
-                'Standalone Apartments': []
-            };
-
-            availableRooms.forEach(room => {
-                const r = room.toLowerCase();
-                if (r.includes('villa')) grouped['Villa Properties'].push(room);
-                else if (r.includes('kadri')) grouped['Kadri Properties'].push(room);
-                else if (r.includes('falnir')) grouped['Falnir Properties'].push(room);
-                else if (r.startsWith('r')) grouped['R-Block'].push(room);
-                else grouped['Standalone Apartments'].push(room);
-            });
-
-            let resultHTML = `
-                <div class="success-message">
-                    <strong>🏠 ${availableRooms.length} individual room(s) available!</strong>
-                </div>
-                <div class="availability-list">
-            `;
-
-            for (const groupName in grouped) {
-                if (grouped[groupName].length > 0) {
-                    resultHTML += `
-                        <details>
-                            <summary>${groupName} <span>(${grouped[groupName].length} available)</span></summary>
-                            <ul>
-                                ${grouped[groupName].map(room => `<li>${room}</li>`).join('')}
-                            </ul>
-                        </details>
-                    `;
-                }
+        const availableRooms = data.available_rooms;
+        if (availableRooms.length > 0) {
+          // Group rooms by property name (e.g., "Palace")
+          const grouped = availableRooms.reduce((acc, room) => {
+            if (!acc[room.propertyName]) {
+              acc[room.propertyName] = [];
             }
+            acc[room.propertyName].push(room.roomName);
+            return acc;
+          }, {});
 
-            resultHTML += `</div>`;
-            resultDiv.innerHTML = resultHTML;
+          let resultHTML = `<div class="result-header">Rooms available on ${selectedDate}</div>`;
+
+          // Iterate over each property that has rooms
+          // This will automatically handle the new "Palace" property
+          for (const groupName in grouped) {
+            if (grouped[groupName].length > 0) {
+              resultHTML += `
+                <details>
+                  <summary>${groupName} <span>(${grouped[groupName].length} available)</span></summary>
+                  <ul>
+                    ${grouped[groupName].map(room => `<li>${room}</li>`).join('')}
+                  </ul>
+                </details>
+              `;
+            }
+          }
+
+          resultHTML += `</div>`;
+          resultDiv.innerHTML = resultHTML;
 
         } else {
-            resultDiv.innerHTML = `
-                <div class="no-results">
-                    <strong>😔 No properties available for this date.</strong>
-                </div>
-            `;
+          resultDiv.innerHTML = `
+            <div class="no-results">
+              <strong>😔 No properties available for this date.</strong>
+            </div>
+          `;
         }
 
         resultDiv.classList.add('show');
@@ -965,58 +398,22 @@
       resultDiv.innerHTML = `<div class="error">⚠️ ${message}</div>`;
       resultDiv.classList.add('show');
     }
+  </script>
+  <!-- Flatpickr library -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  
+  <script>
+    // First we get the viewport height and we set a value to --vh variable
+    let vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
 
-    let deferredPrompt;
-    const installButton = document.getElementById('installButton');
-    const debugMessage = document.getElementById('debugMessage');
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      installButton.style.display = 'block';
-
-      // Show the debug message
-      debugMessage.classList.add('show');
-      setTimeout(() => {
-        debugMessage.classList.remove('show');
-      }, 3000);
+    // We listen for the resize event
+    window.addEventListener('resize', () => {
+      // We execute the same script as before
+      let vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
     });
-
-    installButton.addEventListener('click', () => {
-      installButton.style.display = 'none';
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('User accepted the install prompt');
-          } else {
-            console.log('User dismissed the install prompt');
-          }
-          deferredPrompt = null;
-        });
-      }
-    });
-
-    window.addEventListener('appinstalled', () => {
-      installButton.style.display = 'none';
-      console.log('App was installed.');
-    });
-
-    // --- IMPORTANT: Service Worker Registration ---
-    // This code tells the browser to start using the service worker
-    // You must have this for the PWA features to work
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js')
-          .then(registration => {
-            console.log('Service Worker registered with scope:', registration.scope);
-          })
-          .catch(error => {
-            console.log('Service Worker registration failed:', error);
-          });
-      });
-    }
-    
   </script>
 </body>
 </html>
