@@ -1,0 +1,124 @@
+/**
+ * Handles all GET requests to the web app URL.
+ * This script serves two main purposes:
+ * 1. For the calendar view, it does a quick check using the 'Availability' column to see if ANY property is available on a given date.
+ * 2. For the "Check Availability" button, it returns a detailed list of all specific rooms that are available on that date.
+ *
+ * @param {Object} e The event object, containing request parameters like e.parameter.date.
+ * @returns {ContentService.TextOutput} A JSON response with availability data.
+ */
+function doGet(e) {
+  // Set the response type to JSON
+  const output = ContentService.createTextOutput().setMimeType(ContentService.MimeType.JSON);
+
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    // Get all sheets except for "Master" and any hidden sheets
+    const sheets = ss.getSheets().filter(sheet => sheet.getName() !== "Master" && !sheet.isSheetHidden());
+
+    // Get the date from the URL parameter
+    const queryDateStr = e.parameter.date;
+    if (!queryDateStr) {
+      throw new Error("Missing 'date' parameter. Please select a date.");
+    }
+    
+    // --- Use timezone-aware date parsing to prevent off-by-one errors ---
+    const queryDateObj = new Date(queryDateStr);
+    const queryDay = queryDateObj.getDate();
+    const queryMonth = queryDateObj.getMonth();
+    const queryYear = queryDateObj.getFullYear();
+
+    // --- Hardcoded list of all property/room columns to check for detailed availability ---
+    const PROPERTY_COLUMNS = [
+      '101', '102', '201', '202', '302', 'Kadri 2BHK', 'Kadri 3BHK',
+      'Villa 2BHK', 'Villa 1BHK', 'Falnir 2BHK', 'R401', 'R402'
+    ];
+
+    let availableRoomsForDate = []; // For the detailed view
+    let overallAvailabilityCount = 0; // For the calendar's green/red dots
+
+    // Iterate through each sheet to find the one matching the query date's month and year
+    sheets.forEach(sheet => {
+      const monthYearString = getMonthYearString(sheet, ss.getSpreadsheetTimeZone());
+      if (!monthYearString) return; // Skip if A1 is not a valid month-year
+
+      const [monthStr, yearStr] = monthYearString.split(' ');
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const sheetMonth = monthNames.indexOf(monthStr);
+      const sheetYear = parseInt(yearStr, 10);
+
+      // If this sheet is the correct one for the query date, process it
+      if (sheetMonth === queryMonth && sheetYear === queryYear) {
+        const data = sheet.getDataRange().getValues();
+        if (data.length < 3) return; // Not enough data to process
+
+        const headers = data[0];
+        const dailyData = data.slice(2);
+
+        // --- 1. Logic for Calendar View (maintains original functionality) ---
+        // Find the 'Availability' summary column
+        const availabilityColIndex = headers.findIndex(h => (h || "").toString().trim().toLowerCase() === "availability");
+        
+        if (availabilityColIndex !== -1) {
+          const dateRow = dailyData.find(row => parseInt(row[0]) === queryDay);
+          if (dateRow) {
+            const count = dateRow[availabilityColIndex];
+            if (count && Number(count) > 0) {
+              overallAvailabilityCount += Number(count);
+            }
+          }
+        }
+
+        // --- 2. Logic for Detailed Room Check (for the button click) ---
+        const dateRowData = dailyData.find(row => parseInt(row[0]) === queryDay);
+        if (dateRowData) {
+            // Map header names to their column index for efficient lookup
+            const headerIndexMap = new Map(headers.map((h, i) => [h.toString().trim(), i]));
+
+            PROPERTY_COLUMNS.forEach(propName => {
+                // Check if the property/room column exists in this sheet
+                if (headerIndexMap.has(propName)) {
+                    const colIndex = headerIndexMap.get(propName);
+                    const status = dateRowData[colIndex];
+                    // If the cell value is 0, empty, or null, it's considered available
+                    if (status === 0 || status === '' || status === null) {
+                        availableRoomsForDate.push(propName);
+                    }
+                }
+            });
+        }
+      }
+    });
+
+    // --- Construct the final JSON response ---
+    const result = {
+      query_date: `${queryYear}-${(queryMonth + 1).toString().padStart(2, '0')}-${queryDay.toString().padStart(2, '0')}`,
+      // For calendar: `available_properties` signals if the day is green or red.
+      // We use the count from the 'Availability' column for this to maintain existing behavior.
+      available_properties: overallAvailabilityCount > 0 ? [{ available: overallAvailabilityCount }] : [],
+      // For detail view: `available_rooms` gives the specific list of rooms.
+      available_rooms: availableRoomsForDate
+    };
+    
+    return output.setContent(JSON.stringify(result));
+
+  } catch (error) {
+    // Log any errors for debugging and return a user-friendly error message
+    Logger.log(error);
+    return output.setContent(JSON.stringify({ error: error.message }));
+  }
+}
+
+/**
+ * Helper function to safely get the month-year string from cell A1 of a sheet.
+ * @param {Sheet} sheet The sheet to get the value from.
+ * @param {string} timeZone The spreadsheet's timezone.
+ * @returns {string} The formatted month-year string (e.g., "Aug 2025") or an empty string.
+ */
+function getMonthYearString(sheet, timeZone) {
+  const monthYearCell = sheet.getRange("A1").getValue();
+  if (monthYearCell instanceof Date) {
+    return Utilities.formatDate(monthYearCell, timeZone, 'MMM yyyy');
+  }
+  return (monthYearCell || "").toString().trim();
+}
