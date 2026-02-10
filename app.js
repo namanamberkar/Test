@@ -12,18 +12,20 @@ window.addEventListener('beforeinstallprompt', (e) => {
     console.log('PWA is ready to be installed!');
     e.preventDefault();
     deferredPrompt = e;
-    installBtn.style.display = 'block'; // Show the button when ready
+    if (installBtn) installBtn.style.display = 'block';
 });
 
-installBtn.addEventListener('click', async () => {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log(`User response to install prompt: ${outcome}`);
-        deferredPrompt = null;
-        installBtn.style.display = 'none';
-    }
-});
+if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to install prompt: ${outcome}`);
+            deferredPrompt = null;
+            installBtn.style.display = 'none';
+        }
+    });
+}
 
 const notificationBtn = document.getElementById('enable-notifications');
 const testBtn = document.getElementById('test-notification');
