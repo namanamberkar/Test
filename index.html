@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StaffChat | Internal Management</title>
+    <meta name="description" content="Secure internal management chat for staff members.">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6b46c1">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app" class="glass-container">
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <h1>StaffChat</h1>
+            </header>
+            <nav class="sidebar-nav">
+                <!-- Staff members will be listed here -->
+                <div id="staff-list" class="staff-list">
+                    <div class="loading-shimmer"></div>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="enable-notifications" class="button-65" role="button">Enable Notifications</button>
+            </div>
+        </aside>
+
+        <main class="chat-area">
+            <div id="chat-header" class="chat-header">
+                <h2 id="current-chat-name">Select a contact</h2>
+            </div>
+            <div id="chat-messages" class="messages-container">
+                <div class="welcome-screen">
+                    <p>Welcome to StaffChat. Select a team member to start messaging.</p>
+                </div>
+            </div>
+            <form id="message-form" class="message-input-area">
+                <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" disabled>
+                <button type="submit" id="send-btn" disabled>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                    </svg>
+                </button>
+            </form>
+        </main>
+    </div>
+
+    <script type="module" src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registered', reg))
+                    .catch(err => console.log('Service Worker registration failed', err));
+            });
+        }
+    </script>
+</body>
+
+</html>
