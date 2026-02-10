@@ -5,12 +5,24 @@
 // const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let deferredPrompt;
+const installBtn = document.getElementById('install-pwa');
 
 // Detect Android 'Install' prompt
 window.addEventListener('beforeinstallprompt', (e) => {
     console.log('PWA is ready to be installed!');
     e.preventDefault();
     deferredPrompt = e;
+    installBtn.style.display = 'block'; // Show the button when ready
+});
+
+installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response to install prompt: ${outcome}`);
+        deferredPrompt = null;
+        installBtn.style.display = 'none';
+    }
 });
 
 const notificationBtn = document.getElementById('enable-notifications');
@@ -50,13 +62,22 @@ testBtn.addEventListener('click', () => {
                 const timestamp = new Date().toLocaleTimeString();
 
                 // This will show the notification even if the browser/app is in background
-                await reg.showNotification('StaffChat: Normal Notification', {
-                    body: `[${timestamp}] This works even if you are in another app! 🔥`,
+                // Unique tag for every message forces Android to show a fresh floating banner
+                const notificationTag = 'msg-' + Date.now();
+
+                await reg.showNotification('StaffChat: Priority Message', {
+                    body: `[${timestamp}] This is a high-priority floating notification! 🔔`,
                     icon: 'test.png',
                     badge: 'test.png',
-                    vibrate: [200, 100, 200],
-                    tag: 'background-test',
-                    renotify: true
+                    image: 'test.png', // Large image sometimes triggers heads-up
+                    vibrate: [500, 110, 500, 110, 450, 110, 200, 110, 170, 40, 450, 110, 200, 110, 170, 40, 500],
+                    tag: notificationTag,
+                    silent: false,
+                    requireInteraction: true,
+                    actions: [
+                        { action: 'open', title: 'Open Chat' },
+                        { action: 'close', title: 'Dismiss' }
+                    ]
                 });
                 console.log('Background notification triggered via SW');
             } catch (err) {
@@ -170,3 +191,4 @@ function addMessageToUI(sender, content, type) {
 }
 
 renderStaff();
+
