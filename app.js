@@ -4,6 +4,15 @@
 // const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 // const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+let deferredPrompt;
+
+// Detect Android 'Install' prompt
+window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('PWA is ready to be installed!');
+    e.preventDefault();
+    deferredPrompt = e;
+});
+
 const notificationBtn = document.getElementById('enable-notifications');
 const testBtn = document.getElementById('test-notification');
 
