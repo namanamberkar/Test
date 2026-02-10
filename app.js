@@ -151,4 +151,3 @@ function addMessageToUI(sender, content, type) {
 }
 
 renderStaff();
-
