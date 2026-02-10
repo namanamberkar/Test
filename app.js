@@ -29,25 +29,35 @@ function updateNotificationButton() {
 
 // Trigger Test Notification
 testBtn.addEventListener('click', () => {
-    // Simulate a message coming in after 3 seconds so user can switch away to test background support
-    testBtn.textContent = 'Sending in 3s...';
+    console.log('Test button clicked. Permission:', Notification.permission);
+    testBtn.textContent = 'Sending in 5s...';
     testBtn.disabled = true;
 
+    // 5 seconds gives more time to switch apps on mobile
     setTimeout(async () => {
         if (Notification.permission === 'granted') {
-            const reg = await navigator.serviceWorker.ready;
-            const timestamp = new Date().toLocaleTimeString();
-            reg.showNotification('New Staff Message', {
-                body: `[${timestamp}] Naman Aruna: "Hey! The system is working! 🔥"`,
-                icon: 'https://via.placeholder.com/192/6b46c1/ffffff?text=SC',
-                badge: 'https://via.placeholder.com/72/6b46c1/ffffff?text=SC',
-                vibrate: [200, 100, 200]
-                // Removed 'tag' so multiple notifications can stack
-            });
+            try {
+                const reg = await navigator.serviceWorker.ready;
+                const timestamp = new Date().toLocaleTimeString();
+
+                // This will show the notification even if the browser/app is in background
+                await reg.showNotification('StaffChat: Normal Notification', {
+                    body: `[${timestamp}] This works even if you are in another app! 🔥`,
+                    icon: 'https://via.placeholder.com/192/6b46c1/ffffff?text=SC',
+                    badge: 'https://via.placeholder.com/72/6b46c1/ffffff?text=SC',
+                    vibrate: [200, 100, 200],
+                    tag: 'background-test',
+                    renotify: true
+                });
+                console.log('Background notification triggered via SW');
+            } catch (err) {
+                console.error('SW notification failed:', err);
+                alert('Error: ' + err.message);
+            }
         }
         testBtn.textContent = 'Send Test Message';
         testBtn.disabled = false;
-    }, 3000);
+    }, 5000);
 });
 
 // Request Permission
