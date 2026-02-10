@@ -29,6 +29,12 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     event.waitUntil(
-        clients.openWindow(event.notification.data.url)
+        clients.openWindow(event.notification.data?.url || '/')
     );
+});
+
+// Mandatory fetch handler for PWA installability
+self.addEventListener('fetch', (event) => {
+    // This can be empty, but it must exist for the "Install" prompt to show
+    event.respondWith(fetch(event.request));
 });
