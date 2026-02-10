@@ -1,10 +1,8 @@
-// Supabase Configuration - IMPORTANT: User will need to provide their own keys
-// I will provide a placeholder and instructions on how to set it up.
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Supabase Configuration - TEMPORARILY DISABLED FOR TESTING
+// import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+// const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+// const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+// const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const notificationBtn = document.getElementById('enable-notifications');
 
