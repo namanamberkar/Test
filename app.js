@@ -5,24 +5,50 @@
 // const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const notificationBtn = document.getElementById('enable-notifications');
+const testBtn = document.getElementById('test-notification');
 
 // Update button state based on permission
 function updateNotificationButton() {
     if (!('Notification' in window)) {
         notificationBtn.textContent = 'Not Supported';
         notificationBtn.disabled = true;
+        testBtn.style.display = 'none';
         return;
     }
 
     if (Notification.permission === 'granted') {
-        notificationBtn.textContent = 'Notifications Enabled';
+        notificationBtn.textContent = 'Notifications Active';
         notificationBtn.classList.add('enabled');
         notificationBtn.disabled = true;
     } else if (Notification.permission === 'denied') {
-        notificationBtn.textContent = 'Blocked by Browser';
+        notificationBtn.textContent = 'Notifications Blocked';
         notificationBtn.disabled = true;
+        testBtn.style.display = 'none';
     }
 }
+
+// Trigger Test Notification
+testBtn.addEventListener('click', () => {
+    // Simulate a message coming in after 3 seconds so user can switch away to test background support
+    testBtn.textContent = 'Sending in 3s...';
+    testBtn.disabled = true;
+
+    setTimeout(async () => {
+        if (Notification.permission === 'granted') {
+            // Check if service worker is ready for a "background" style notification
+            const reg = await navigator.serviceWorker.ready;
+            reg.showNotification('New Staff Message', {
+                body: 'Naman Aruna: "Hey! The new internal system is looking great! 🔥"',
+                icon: 'https://via.placeholder.com/192/6b46c1/ffffff?text=SC',
+                badge: 'https://via.placeholder.com/72/6b46c1/ffffff?text=SC',
+                vibrate: [200, 100, 200],
+                tag: 'test-message'
+            });
+        }
+        testBtn.textContent = 'Send Test Message';
+        testBtn.disabled = false;
+    }, 3000);
+});
 
 // Request Permission
 notificationBtn.addEventListener('click', async () => {
