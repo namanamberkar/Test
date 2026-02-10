@@ -1,5 +1,19 @@
+const CACHE_NAME = 'staffchat-v1';
+const ASSETS = [
+    './',
+    './index.html',
+    './styles.css',
+    './app.js',
+    './manifest.json'
+];
+
 self.addEventListener('install', (event) => {
-    console.log('Service Worker installed');
+    console.log('Service Worker installing...');
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.addAll(ASSETS);
+        })
+    );
     self.skipWaiting();
 });
 
@@ -38,3 +52,4 @@ self.addEventListener('fetch', (event) => {
     // This can be empty, but it must exist for the "Install" prompt to show
     event.respondWith(fetch(event.request));
 });
+
