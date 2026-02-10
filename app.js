@@ -35,14 +35,14 @@ testBtn.addEventListener('click', () => {
 
     setTimeout(async () => {
         if (Notification.permission === 'granted') {
-            // Check if service worker is ready for a "background" style notification
             const reg = await navigator.serviceWorker.ready;
+            const timestamp = new Date().toLocaleTimeString();
             reg.showNotification('New Staff Message', {
-                body: 'Naman Aruna: "Hey! The new internal system is looking great! 🔥"',
+                body: `[${timestamp}] Naman Aruna: "Hey! The system is working! 🔥"`,
                 icon: 'https://via.placeholder.com/192/6b46c1/ffffff?text=SC',
                 badge: 'https://via.placeholder.com/72/6b46c1/ffffff?text=SC',
-                vibrate: [200, 100, 200],
-                tag: 'test-message'
+                vibrate: [200, 100, 200]
+                // Removed 'tag' so multiple notifications can stack
             });
         }
         testBtn.textContent = 'Send Test Message';
@@ -151,3 +151,4 @@ function addMessageToUI(sender, content, type) {
 }
 
 renderStaff();
+
