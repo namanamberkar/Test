@@ -4,7 +4,7 @@
  */
 
 // Replace this with your actual Google Apps Script Web App URL
-const GAS_URL = 'YOUR_GAS_WEB_APP_URL';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyg_tQoVICg80QZfRmoqMHXaK4V7hTc3GXjIe4LgL06rm9mrHS8T3oWJB95BaoUQuhB/exec';
 
 // DOM Elements
 const dashboardView = document.getElementById('dashboard-view');
@@ -284,4 +284,5 @@ function formatDateKey(date) {
     const d = ("0" + date.getDate()).slice(-2);
     return `${y}-${m}-${d}`;
 }
+
 
