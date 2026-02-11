@@ -231,6 +231,13 @@ async function subscribeUserToPush() {
 
         const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
 
+        // CRITICAL FIX: Unsubscribe existing (old) subscription to force new key usage
+        const existingSub = await registration.pushManager.getSubscription();
+        if (existingSub) {
+            console.log('Unsubscribing old token...');
+            await existingSub.unsubscribe();
+        }
+
         const subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: convertedVapidKey
@@ -284,5 +291,3 @@ function formatDateKey(date) {
     const d = ("0" + date.getDate()).slice(-2);
     return `${y}-${m}-${d}`;
 }
-
-
