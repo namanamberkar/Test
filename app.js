@@ -216,6 +216,30 @@ enableNotificationsBtn.addEventListener('click', async () => {
     }
 });
 
+// DEBUG: Add a hidden debug trigger (triple click status badge)
+let debugClicks = 0;
+statusBadge.addEventListener('click', async () => {
+    debugClicks++;
+    if (debugClicks === 3) {
+        debugClicks = 0;
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) {
+            const details = JSON.stringify(sub, null, 2);
+            alert("DEBUG INFO (Copy this):\n" + details);
+            console.log("DEBUG SUB:", sub);
+
+            // Check key match
+            const endpoint = sub.endpoint;
+            if (endpoint.includes("google")) {
+                alert("Endpoint looks correct (FCM).");
+            }
+        } else {
+            alert("No active subscription found on this device.");
+        }
+    }
+});
+
 async function subscribeUserToPush() {
     try {
         const registration = await navigator.serviceWorker.ready;
@@ -223,7 +247,7 @@ async function subscribeUserToPush() {
         // IMPORTANT: For Push Notifications to work, you need a VAPID Public Key.
         // You can generate one for free at: https://vapidkeys.com/
         // Firebase Web Push Certificate (VAPID Public Key)
-        const VAPID_PUBLIC_KEY = 'BLGG-f8Mv-j8NVYarhWScBDtz9LdE_zo2qXpuf0TGE8eZlHH-nuQ6DnqvBxzLmO3Yrdq2349Y_ZsHoFacdciVxo';
+        const VAPID_PUBLIC_KEY = 'BPB-wIUFNU4DtZxXUkDG_pgtZCvclKE89sV8-nIJ6tDdlVXTKzwIa611aP0mewJakBa2a6DjfWVjcpVJGfSadng';
 
         if (VAPID_PUBLIC_KEY === 'BDE6l-R_Uo_v_Y_Z_X_W_v_T_X_v_S_v_X_v_S_v_X_v_S_v_X_v_S_v_X_v_S_v_X_v_S_v_X') {
             console.warn('Using default placeholder VAPID key. This may fail. Generate one at vapidkeys.com');
