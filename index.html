@@ -8,6 +8,7 @@
     <meta name="description" content="Secure internal management dashboard for Aikya staff.">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6b46c1">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Aikya App">
@@ -72,11 +73,13 @@
                             </div>
                         </div>
                         <div class="list-section">
-                            <h4>Arrivals 🛬</h4>
-                            <div id="today-checkins-list" class="mini-list">No arrivals</div>
-                            <h4 style="margin-top: 15px;">Departures 🛫</h4>
-                            <div id="today-checkouts-list" class="mini-list">No departures</div>
+                            <h4>Check-ins 🛬</h4>
+                            <div id="today-checkins-list" class="mini-list">No check-ins</div>
+                            <h4 style="margin-top: 15px;">Check-outs 🛫</h4>
+                            <div id="today-checkouts-list" class="mini-list">No check-outs</div>
                         </div>
+                        <p class="badge" style="margin-top: 15px; font-size: 0.7rem;">Tip: Click entries to copy details
+                        </p>
                     </section>
 
                     <!-- Tomorrow's Summary Card -->
@@ -96,9 +99,9 @@
                             </div>
                         </div>
                         <div class="list-section">
-                            <h4>Expected Arrivals</h4>
+                            <h4>Expected Check-ins</h4>
                             <div id="tomorrow-checkins-list" class="mini-list">Loading...</div>
-                            <h4 style="margin-top: 15px;">Expected Departures</h4>
+                            <h4 style="margin-top: 15px;">Expected Check-outs</h4>
                             <div id="tomorrow-checkouts-list" class="mini-list">Loading...</div>
                         </div>
                     </section>
