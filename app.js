@@ -1,196 +1,245 @@
-// Supabase Configuration - TEMPORARILY DISABLED FOR TESTING
-// import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-// const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-// const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-// const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+/**
+ * Aikya Management App - Core Logic
+ * Connects to Google Apps Script Backend
+ */
 
-let deferredPrompt;
+// Replace this with your actual Google Apps Script Web App URL
+const GAS_URL = 'YOUR_GAS_WEB_APP_URL';
+
+// DOM Elements
+const dashboardView = document.getElementById('dashboard-view');
+const searchView = document.getElementById('search-view');
+const guestSearch = document.getElementById('guest-search');
+const refreshBtn = document.getElementById('refresh-data');
+const statusBadge = document.getElementById('status-badge');
+const navDashboard = document.getElementById('nav-dashboard');
+const navSearch = document.getElementById('nav-search');
+
+// Notification Elements
+const enableNotificationsBtn = document.getElementById('enable-notifications');
 const installBtn = document.getElementById('install-pwa');
 
-// Detect Android 'Install' prompt
-window.addEventListener('beforeinstallprompt', (e) => {
-    console.log('PWA is ready to be installed!');
-    e.preventDefault();
-    deferredPrompt = e;
-    if (installBtn) installBtn.style.display = 'block';
+// State
+let dashboardData = null;
+let deferredPrompt;
+
+// ============================================
+// INITIALIZATION
+// ============================================
+
+window.addEventListener('DOMContentLoaded', () => {
+    if (GAS_URL === 'YOUR_GAS_WEB_APP_URL') {
+        alert('Please update the GAS_URL in app.js with your deployed Web App URL!');
+    }
+    fetchDashboard();
 });
 
-if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`User response to install prompt: ${outcome}`);
-            deferredPrompt = null;
-            installBtn.style.display = 'none';
-        }
-    });
+// ============================================
+// NAVIGATION & UI
+// ============================================
+
+navDashboard.addEventListener('click', () => {
+    showView('dashboard');
+});
+
+navSearch.addEventListener('click', () => {
+    showView('search');
+});
+
+function showView(view) {
+    if (view === 'dashboard') {
+        dashboardView.style.display = 'block';
+        searchView.style.display = 'none';
+        navDashboard.classList.add('active');
+        navSearch.classList.remove('active');
+    } else {
+        dashboardView.style.display = 'none';
+        searchView.style.display = 'block';
+        navDashboard.classList.remove('active');
+        navSearch.classList.add('active');
+    }
 }
 
-const notificationBtn = document.getElementById('enable-notifications');
-const testBtn = document.getElementById('test-notification');
+refreshBtn.addEventListener('click', fetchDashboard);
 
-// Update button state based on permission
-function updateNotificationButton() {
-    if (!('Notification' in window)) {
-        notificationBtn.textContent = 'Not Supported';
-        notificationBtn.disabled = true;
-        testBtn.style.display = 'none';
+// ============================================
+// DATA FETCHING
+// ============================================
+
+async function fetchDashboard() {
+    if (!GAS_URL || GAS_URL.includes('YOUR_GAS')) return;
+
+    statusBadge.textContent = 'Updating...';
+    try {
+        const response = await fetch(`${GAS_URL}?api=dashboard`);
+        const data = await response.json();
+        if (data.success) {
+            dashboardData = data;
+            updateDashboardUI();
+            statusBadge.textContent = 'Updated just now';
+        }
+    } catch (error) {
+        console.error('Fetch error:', error);
+        statusBadge.textContent = 'Server Error';
+    }
+}
+
+function updateDashboardUI() {
+    const { today, tomorrow } = dashboardData;
+
+    // Today's Stats
+    document.getElementById('today-date').textContent = formatDate(today.date);
+    document.getElementById('today-day').textContent = today.day;
+    document.getElementById('today-in').textContent = today.summary.checkins;
+    document.getElementById('today-out').textContent = today.summary.checkouts;
+    document.getElementById('today-occ').textContent = today.summary.occupied;
+
+    // Tomorrow's Stats
+    document.getElementById('tomorrow-date').textContent = formatDate(tomorrow.date);
+    document.getElementById('tomorrow-day').textContent = tomorrow.day;
+    document.getElementById('tomorrow-in').textContent = tomorrow.summary.checkins;
+    document.getElementById('tomorrow-out').textContent = tomorrow.summary.checkouts;
+
+    // Lists
+    renderBookingList('today-checkins-list', today.checkins, 'No arrivals');
+    renderBookingList('today-checkouts-list', today.checkouts, 'No departures');
+    renderBookingList('tomorrow-checkins-list', tomorrow.checkins, 'No expected arrivals');
+    renderBookingList('tomorrow-checkouts-list', tomorrow.checkouts, 'No expected departures');
+}
+
+function renderBookingList(elementId, bookings, emptyMsg) {
+    const container = document.getElementById(elementId);
+    if (!bookings || bookings.length === 0) {
+        container.innerHTML = `<p class="empty-state">${emptyMsg}</p>`;
         return;
     }
 
-    if (Notification.permission === 'granted') {
-        notificationBtn.textContent = 'Notifications Active';
-        notificationBtn.classList.add('enabled');
-        notificationBtn.disabled = true;
-    } else if (Notification.permission === 'denied') {
-        notificationBtn.textContent = 'Notifications Blocked';
-        notificationBtn.disabled = true;
-        testBtn.style.display = 'none';
-    }
-}
-
-// Trigger Test Notification
-testBtn.addEventListener('click', () => {
-    console.log('Test button clicked. Permission:', Notification.permission);
-    testBtn.textContent = 'Sending in 5s...';
-    testBtn.disabled = true;
-
-    // 5 seconds gives more time to switch apps on mobile
-    setTimeout(async () => {
-        if (Notification.permission === 'granted') {
-            try {
-                const reg = await navigator.serviceWorker.ready;
-                const timestamp = new Date().toLocaleTimeString();
-
-                // This will show the notification even if the browser/app is in background
-                // Unique tag for every message forces Android to show a fresh floating banner
-                const notificationTag = 'msg-' + Date.now();
-
-                await reg.showNotification('StaffChat: Priority Message', {
-                    body: `[${timestamp}] This is a high-priority floating notification! 🔔`,
-                    icon: 'test.png',
-                    badge: 'test.png',
-                    image: 'test.png', // Large image sometimes triggers heads-up
-                    vibrate: [500, 110, 500, 110, 450, 110, 200, 110, 170, 40, 450, 110, 200, 110, 170, 40, 500],
-                    tag: notificationTag,
-                    silent: false,
-                    requireInteraction: true,
-                    actions: [
-                        { action: 'open', title: 'Open Chat' },
-                        { action: 'close', title: 'Dismiss' }
-                    ]
-                });
-                console.log('Background notification triggered via SW');
-            } catch (err) {
-                console.error('SW notification failed:', err);
-                alert('Error: ' + err.message);
-            }
-        }
-        testBtn.textContent = 'Send Test Message';
-        testBtn.disabled = false;
-    }, 5000);
-});
-
-// Request Permission
-notificationBtn.addEventListener('click', async () => {
-    try {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-            new Notification('StaffChat', {
-                body: 'Push notifications are now enabled!',
-                icon: '/icons/icon-192.png'
-            });
-            updateNotificationButton();
-        }
-    } catch (error) {
-        console.error('Error requesting notification permission:', error);
-    }
-});
-
-// Initial check
-updateNotificationButton();
-
-// App State
-let currentStaff = null;
-let currentUser = { id: 'staff-1', name: 'Me' }; // Mock logged in user
-
-// DOM Elements
-const chatMessages = document.getElementById('chat-messages');
-const currentChatName = document.getElementById('current-chat-name');
-const messageForm = document.getElementById('message-form');
-const messageInput = document.getElementById('message-input');
-const sendBtn = document.getElementById('send-btn');
-
-function selectStaff(staff) {
-    currentStaff = staff;
-    currentChatName.textContent = `Chatting with ${staff.name}`;
-    messageInput.disabled = false;
-    sendBtn.disabled = false;
-    messageInput.placeholder = "Type a message...";
-
-    // Clear messages and load history (mock)
-    chatMessages.innerHTML = `
-        <div class="welcome-screen">
-            <p>Direct message history with ${staff.name} will appear here.</p>
-        </div>
-    `;
-}
-
-// Mock Staff List with interactive selection
-const dummyStaff = [
-    { id: 'staff-2', name: 'Naman Aruna', status: 'Online' },
-    { id: 'staff-3', name: 'Jane Doe', status: 'Away' },
-    { id: 'staff-4', name: 'John Smith', status: 'Offline' }
-];
-
-function renderStaff() {
-    staffList.innerHTML = dummyStaff.map(staff => `
-        <div class="staff-item" id="${staff.id}">
-            <div class="staff-info">
-                <div class="staff-name">${staff.name}</div>
-                <div class="staff-status ${staff.status.toLowerCase()}">${staff.status}</div>
-            </div>
+    container.innerHTML = bookings.map(b => `
+        <div class="list-item">
+            <span class="guest-name">${b.guestName}</span>
+            <span class="prop-name">${b.property}</span>
         </div>
     `).join('');
+}
 
-    // Add click listeners
-    dummyStaff.forEach(staff => {
-        document.getElementById(staff.id).addEventListener('click', () => selectStaff(staff));
+// ============================================
+// SEARCH LOGIC
+// ============================================
+
+let searchTimeout;
+guestSearch.addEventListener('input', (e) => {
+    const query = e.target.value.trim();
+    if (query.length < 3) return;
+
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        performSearch(query);
+    }, 500);
+});
+
+async function performSearch(query) {
+    showView('search');
+    const container = document.getElementById('search-results-list');
+    container.innerHTML = '<p class="badge">Searching...</p>';
+
+    try {
+        const response = await fetch(`${GAS_URL}?api=search&guest=${encodeURIComponent(query)}`);
+        const data = await response.json();
+
+        if (data.success && data.results.length > 0) {
+            container.innerHTML = data.results.map(b => `
+                <div class="summary-card" style="margin-bottom: 12px;">
+                    <div class="card-header">
+                        <h3>${b.guestName}</h3>
+                        <span class="day-label">${b.property}</span>
+                    </div>
+                    <div style="font-size: 0.9rem; color: var(--text-muted);">
+                        <p>📍 Source: ${b.bookingSource || 'Direct'}</p>
+                        <p>📅 ${b.checkInDate} to ${b.checkOutDate}</p>
+                        <p>👥 ${b.noOfGuests} Guests | 💰 ${b.amountPaid || 'N/A'}</p>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = '<p class="empty-state">No bookings found for that name.</p>';
+        }
+    } catch (error) {
+        container.innerHTML = '<p class="empty-state">Error searching. Check console.</p>';
+    }
+}
+
+// ============================================
+// PWA & NOTIFICATIONS
+// ============================================
+
+// PWA Install
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'block';
+});
+
+installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') installBtn.style.display = 'none';
+        deferredPrompt = null;
+    }
+});
+
+// Notifications
+enableNotificationsBtn.addEventListener('click', async () => {
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+        const subscription = await subscribeUserToPush();
+        if (subscription) {
+            saveSubscriptionToGAS(subscription);
+            enableNotificationsBtn.textContent = 'Alerts Active ✅';
+            enableNotificationsBtn.disabled = true;
+        }
+    }
+});
+
+async function subscribeUserToPush() {
+    try {
+        const registration = await navigator.serviceWorker.ready;
+        // You would normally need your public VAPID key here
+        // For simple triggers, we'll store the endpoint in GAS
+        const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: 'TODO_YOUR_VAPID_PUBLIC_KEY'
+        });
+        return subscription;
+    } catch (err) {
+        console.error('Subscription failed', err);
+        return null;
+    }
+}
+
+async function saveSubscriptionToGAS(sub) {
+    const body = new URLSearchParams();
+    body.append('api', 'subscribe');
+    body.append('subscription', JSON.stringify(sub));
+    body.append('userAgent', navigator.userAgent);
+
+    await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body
     });
 }
 
-// Message Sending
-messageForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const content = messageInput.value.trim();
-    if (!content || !currentStaff) return;
-
-    // UI Feedback: Add message immediately
-    addMessageToUI('Me', content, 'sent');
-    messageInput.value = '';
-
-    // Real-time: This is where we'd push to Supabase
-    /*
-    const { error } = await supabase
-        .from('messages')
-        .insert([{ content, sender_id: currentUser.id, receiver_id: currentStaff.id }]);
-    */
-});
-
-function addMessageToUI(sender, content, type) {
-    const welcome = chatMessages.querySelector('.welcome-screen');
-    if (welcome) welcome.remove();
-
-    const msgDiv = document.createElement('div');
-    msgDiv.className = `message ${type}`;
-    msgDiv.innerHTML = `
-        <div class="message-content">${content}</div>
-        <div class="message-meta">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-    `;
-    chatMessages.appendChild(msgDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+// Utilities
+function formatDate(dateStr) {
+    const [y, m, d] = dateStr.split('-');
+    return `${d}/${m}`;
 }
 
-renderStaff();
+function formatDateKey(date) {
+    const y = date.getFullYear();
+    const m = ("0" + (date.getMonth() + 1)).slice(-2);
+    const d = ("0" + date.getDate()).slice(-2);
+    return `${y}-${m}-${d}`;
+}
 
