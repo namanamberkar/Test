@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Push Notification Debugger</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #333;
+            color: #fff;
+        }
+
+        button {
+            padding: 15px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            background: #00ff00;
+            border: none;
+            font-weight: bold;
+        }
+
+        textarea {
+            width: 100%;
+            height: 300px;
+            margin-top: 20px;
+            background: #000;
+            color: #0f0;
+            border: 1px solid #555;
+            padding: 10px;
+        }
+
+        .log {
+            margin-top: 10px;
+            color: #aaa;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🛑 Push Debugger 🛑</h1>
+    <p>This tool bypasses the main app to test your keys directly.</p>
+
+    <button onclick="subscribe()">1. Generate NEW Token</button>
+    <br><br>
+
+    <div id="log" class="log">Ready...</div>
+
+    <label>Result (Copy This):</label>
+    <textarea id="result"></textarea>
+
+    <script>
+        // The NEW Key you provided
+        const VAPID_KEY = 'BPB-wIUFNU4DtZxXUkDG_pgtZCvclKE89sV8-nIJ6tDdlVXTKzwIa611aP0mewJakBa2a6DjfWVjcpVJGfSadng';
+
+        function log(msg) {
+            document.getElementById('log').innerText += '\n' + msg;
+            console.log(msg);
+        }
+
+        async function subscribe() {
+            try {
+                log('Registering Service Worker...');
+                const reg = await navigator.serviceWorker.register('sw.js');
+                log('Service Worker Active.');
+
+                log('Unsubscribing old tokens...');
+                const oldSub = await reg.pushManager.getSubscription();
+                if (oldSub) await oldSub.unsubscribe();
+
+                function urlBase64ToUint8Array(base64String) {
+                    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+                    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+                    const rawData = window.atob(base64);
+                    const outputArray = new Uint8Array(rawData.length);
+                    for (let i = 0; i < rawData.length; ++i) {
+                        outputArray[i] = rawData.charCodeAt(i);
+                    }
+                    return outputArray;
+                }
+
+                log('Subscribing with Key: ' + VAPID_KEY.substring(0, 15) + '...');
+                const sub = await reg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(VAPID_KEY)
+                });
+
+                log('✅ SUCCESS! Token generated.');
+                document.getElementById('result').value = JSON.stringify(sub, null, 2);
+
+            } catch (err) {
+                log('❌ ERROR: ' + err.message);
+            }
+        }
+    </script>
+</body>
+
+</html>
