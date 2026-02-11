@@ -1,4 +1,4 @@
-const CACHE_NAME = 'staffchat-v1';
+const CACHE_NAME = 'aikya-v2';
 const ASSETS = [
     './',
     './index.html',
@@ -53,3 +53,4 @@ self.addEventListener('fetch', (event) => {
     // This can be empty, but it must exist for the "Install" prompt to show
     event.respondWith(fetch(event.request));
 });
+
