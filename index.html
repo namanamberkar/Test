@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StaffChat | Internal Management</title>
-    <meta name="description" content="Secure internal management chat for staff members.">
+    <title>Aikya | Management Dashboard</title>
+    <meta name="description" content="Secure internal management dashboard for Aikya staff.">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6b46c1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="StaffChat">
+    <meta name="apple-mobile-web-app-title" content="Aikya App">
     <link rel="apple-touch-icon" href="test.png">
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,54 +19,110 @@
 </head>
 
 <body>
-    <div id="app" class="glass-container">
+    <div id="app" class="dashboard-container">
+        <!-- Main Sidebar -->
         <aside class="sidebar">
             <header class="sidebar-header">
-                <h1>StaffChat</h1>
+                <h1>Aikya</h1>
             </header>
+
+            <div class="search-box">
+                <input type="text" id="guest-search" placeholder="Search Guest Name..." autocomplete="off">
+            </div>
+
             <nav class="sidebar-nav">
-                <!-- Staff members will be listed here -->
-                <div id="staff-list" class="staff-list">
-                    <div class="loading-shimmer"></div>
-                </div>
+                <div class="nav-item active" id="nav-dashboard">📊 Dashboard</div>
+                <div class="nav-item" id="nav-search">🔍 Search Results</div>
             </nav>
-            <div class="sidebar-footer" style="display: flex; flex-direction: column; gap: 10px;">
-                <button id="install-pwa" class="button-65" style="display: none; background-color: #48bb78;"
-                    role="button">Install StaffChat</button>
-                <button id="enable-notifications" class="button-65" role="button">Notifications Enabled</button>
-                <button id="test-notification" class="button-65"
-                    style="background-color: #2d3748; border: 1px solid var(--glass-border);" role="button">Send Test
-                    Message</button>
+
+            <div class="sidebar-footer">
+                <button id="install-pwa" class="btn btn-primary" style="display: none;">Install App</button>
+                <button id="enable-notifications" class="btn btn-secondary">Enable Alerts</button>
+                <div id="status-badge" class="badge">Checking Server...</div>
             </div>
         </aside>
 
-        <main class="chat-area">
-            <div id="chat-header" class="chat-header">
-                <h2 id="current-chat-name">Select a contact</h2>
-            </div>
-            <div id="chat-messages" class="messages-container">
-                <div class="welcome-screen">
-                    <p>Welcome to StaffChat. Select a team member to start messaging.</p>
+        <!-- Dynamic Content Area -->
+        <main class="content-area">
+            <div id="dashboard-view">
+                <div class="header-row">
+                    <h2 id="view-title">Management Overview</h2>
+                    <button id="refresh-data" class="btn-refresh">🔄 Update Now</button>
+                </div>
+
+                <div class="summary-grid">
+                    <!-- Today's Summary Card -->
+                    <section class="summary-card" id="today-card">
+                        <div class="card-header">
+                            <h3>Today: <span id="today-date">--/--</span></h3>
+                            <span class="day-label" id="today-day">...</span>
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-item">
+                                <span class="stat-value" id="today-in">0</span>
+                                <span class="stat-label">Check-ins</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="today-out">0</span>
+                                <span class="stat-label">Check-outs</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="today-occ">0</span>
+                                <span class="stat-label">Occupied</span>
+                            </div>
+                        </div>
+                        <div class="list-section">
+                            <h4>Arrivals 🛬</h4>
+                            <div id="today-checkins-list" class="mini-list">No arrivals</div>
+                            <h4 style="margin-top: 15px;">Departures 🛫</h4>
+                            <div id="today-checkouts-list" class="mini-list">No departures</div>
+                        </div>
+                    </section>
+
+                    <!-- Tomorrow's Summary Card -->
+                    <section class="summary-card secondary" id="tomorrow-card">
+                        <div class="card-header">
+                            <h3>Tomorrow: <span id="tomorrow-date">--/--</span></h3>
+                            <span class="day-label" id="tomorrow-day">...</span>
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-item">
+                                <span class="stat-value" id="tomorrow-in">0</span>
+                                <span class="stat-label">Check-ins</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="tomorrow-out">0</span>
+                                <span class="stat-label">Check-outs</span>
+                            </div>
+                        </div>
+                        <div class="list-section">
+                            <h4>Expected Arrivals</h4>
+                            <div id="tomorrow-checkins-list" class="mini-list">Loading...</div>
+                            <h4 style="margin-top: 15px;">Expected Departures</h4>
+                            <div id="tomorrow-checkouts-list" class="mini-list">Loading...</div>
+                        </div>
+                    </section>
                 </div>
             </div>
-            <form id="message-form" class="message-input-area">
-                <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" disabled>
-                <button type="submit" id="send-btn" disabled>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-                    </svg>
-                </button>
-            </form>
+
+            <!-- Search Results View (Hidden by default) -->
+            <div id="search-view" style="display: none;">
+                <h2>Search Results</h2>
+                <div id="search-results-list" class="results-grid">
+                    <p class="empty-state">Enter a name to search bookings...</p>
+                </div>
+            </div>
         </main>
     </div>
 
+    <!-- Notification Service Worker Registration -->
     <script type="module" src="app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('Service Worker registered', reg))
-                    .catch(err => console.log('Service Worker registration failed', err));
+                    .then(reg => console.log('SW Registered'))
+                    .catch(err => console.error('SW Registration Failed', err));
             });
         }
     </script>
