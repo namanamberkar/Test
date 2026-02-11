@@ -84,6 +84,36 @@ async function fetchDashboard() {
     }
 }
 
+function renderBookingList(elementId, bookings, emptyMsg) {
+    const container = document.getElementById(elementId);
+    if (!bookings || bookings.length === 0) {
+        container.innerHTML = `<p class="empty-state">${emptyMsg}</p>`;
+        return;
+    }
+
+    container.innerHTML = bookings.map(b => `
+        <div class="list-item clickable" onclick="copyBookingDetails('${b.guestName}', '${b.property}')">
+            <span class="guest-name">${b.guestName}</span>
+            <span class="prop-name">${b.property}</span>
+            <span class="copy-icon">📋</span>
+        </div>
+    `).join('');
+}
+
+window.copyBookingDetails = function (name, property) {
+    const text = `${name} - ${property}`;
+    navigator.clipboard.writeText(text).then(() => {
+        const badge = document.getElementById('status-badge');
+        const originalText = badge.textContent;
+        badge.textContent = 'Copied to clipboard! ✅';
+        badge.style.color = 'var(--success)';
+        setTimeout(() => {
+            badge.textContent = originalText;
+            badge.style.color = 'var(--text-muted)';
+        }, 2000);
+    });
+};
+
 function updateDashboardUI() {
     const { today, tomorrow } = dashboardData;
 
@@ -101,25 +131,10 @@ function updateDashboardUI() {
     document.getElementById('tomorrow-out').textContent = tomorrow.summary.checkouts;
 
     // Lists
-    renderBookingList('today-checkins-list', today.checkins, 'No arrivals');
-    renderBookingList('today-checkouts-list', today.checkouts, 'No departures');
-    renderBookingList('tomorrow-checkins-list', tomorrow.checkins, 'No expected arrivals');
-    renderBookingList('tomorrow-checkouts-list', tomorrow.checkouts, 'No expected departures');
-}
-
-function renderBookingList(elementId, bookings, emptyMsg) {
-    const container = document.getElementById(elementId);
-    if (!bookings || bookings.length === 0) {
-        container.innerHTML = `<p class="empty-state">${emptyMsg}</p>`;
-        return;
-    }
-
-    container.innerHTML = bookings.map(b => `
-        <div class="list-item">
-            <span class="guest-name">${b.guestName}</span>
-            <span class="prop-name">${b.property}</span>
-        </div>
-    `).join('');
+    renderBookingList('today-checkins-list', today.checkins, 'No check-ins');
+    renderBookingList('today-checkouts-list', today.checkouts, 'No check-outs');
+    renderBookingList('tomorrow-checkins-list', tomorrow.checkins, 'No expected check-ins');
+    renderBookingList('tomorrow-checkouts-list', tomorrow.checkouts, 'No expected check-outs');
 }
 
 // ============================================
@@ -204,17 +219,43 @@ enableNotificationsBtn.addEventListener('click', async () => {
 async function subscribeUserToPush() {
     try {
         const registration = await navigator.serviceWorker.ready;
-        // You would normally need your public VAPID key here
-        // For simple triggers, we'll store the endpoint in GAS
+
+        // IMPORTANT: For Push Notifications to work, you need a VAPID Public Key.
+        // You can generate one for free at: https://vapidkeys.com/
+        const VAPID_PUBLIC_KEY = 'BP1QRockyosGgjLDTnYQEvrjJShBnF8M7V_dtj_KZK3uAmIDX2pqzTXU5mPt8cp3xXw-IUJHFLxe9S5ceM3kbC8';
+
+        if (VAPID_PUBLIC_KEY === 'BDE6l-R_Uo_v_Y_Z_X_W_v_T_X_v_S_v_X_v_S_v_X_v_S_v_X_v_S_v_X_v_S_v_X_v_S_v_X_v_S_v_X') {
+            console.warn('Using default placeholder VAPID key. This may fail. Generate one at vapidkeys.com');
+        }
+
+        const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+
         const subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: 'TODO_YOUR_VAPID_PUBLIC_KEY'
+            applicationServerKey: convertedVapidKey
         });
         return subscription;
     } catch (err) {
         console.error('Subscription failed', err);
+        alert('Notification setup failed: ' + err.message + '\n\nPlease ensure you have a valid VAPID_PUBLIC_KEY in app.js');
         return null;
     }
+}
+
+// Helper function for VAPID key conversion
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+        .replace(/\-/g, '+')
+        .replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
 }
 
 async function saveSubscriptionToGAS(sub) {
@@ -242,5 +283,3 @@ function formatDateKey(date) {
     const d = ("0" + date.getDate()).slice(-2);
     return `${y}-${m}-${d}`;
 }
-
-
