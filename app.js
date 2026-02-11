@@ -4,7 +4,7 @@
  */
 
 // Replace this with your actual Google Apps Script Web App URL
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbyg_tQoVICg80QZfRmoqMHXaK4V7hTc3GXjIe4LgL06rm9mrHS8T3oWJB95BaoUQuhB/exec';
+const GAS_URL = 'YOUR_GAS_WEB_APP_URL';
 
 // DOM Elements
 const dashboardView = document.getElementById('dashboard-view');
@@ -222,9 +222,10 @@ async function subscribeUserToPush() {
 
         // IMPORTANT: For Push Notifications to work, you need a VAPID Public Key.
         // You can generate one for free at: https://vapidkeys.com/
-        const VAPID_PUBLIC_KEY = 'BP1QRockyosGgjLDTnYQEvrjJShBnF8M7V_dtj_KZK3uAmIDX2pqzTXU5mPt8cp3xXw-IUJHFLxe9S5ceM3kbC8';
+        // Firebase Web Push Certificate (VAPID Public Key)
+        const VAPID_PUBLIC_KEY = 'BLGG-f8Mv-j8NVYarhWScBDtz9LdE_zo2qXpuf0TGE8eZlHH-nuQ6DnqvBxzLmO3Yrdq2349Y_ZsHoFacdciVxo';
 
-        if (VAPID_PUBLIC_KEY === 'BDE6l-R_Uo_v_Y_Z_X_W_v_T_X_v_S_v_X_v_S_v_X_v_S_v_X_v_S_v_X_v_S_v_X_v_S_v_X_v_S_v_X') {
+        if (VAPID_PUBLIC_KEY === 'BDE6l-R_Uo_v_Y_Z_X_W_v_T_X_v_S_v_X_v_S_v_X_v_S_v_X_v_S_v_X_v_S_v_X_v_S_v_X') {
             console.warn('Using default placeholder VAPID key. This may fail. Generate one at vapidkeys.com');
         }
 
@@ -283,3 +284,4 @@ function formatDateKey(date) {
     const d = ("0" + date.getDate()).slice(-2);
     return `${y}-${m}-${d}`;
 }
+
