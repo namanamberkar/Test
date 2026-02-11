@@ -1,7 +1,6 @@
 {
   "name": "StaffChat",
   "short_name": "StaffChat",
-  "gcm_sender_id": "53820608545",
   "id": ".",
   "start_url": "./index.html",
   "display": "standalone",
